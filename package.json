@@ -1,0 +1,27 @@
+{
+  "name": "composite-crowdsale",
+  "version": "1.0.0",
+  "description": "Ethereum Composite Crowdsale",
+  "main": "truffle.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/facuspagnuolo/composite-crowdsale.git"
+  },
+  "keywords": [
+    "ethereum",
+    "smart-contracts",
+    "solidity",
+    "evm",
+    "crowdsale"
+  ],
+  "author": "Facu Spagnuolo <facundo_spagnuolo@icloud.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/facuspagnuolo/composite-crowdsale/issues"
+  },
+  "homepage": "https://github.com/facuspagnuolo/composite-crowdsale#readme",
+  "devDependencies": {
+    "ethereumjs-testrpc": "^6.0.3",
+    "truffle": "^4.0.4"
+  }
+}
