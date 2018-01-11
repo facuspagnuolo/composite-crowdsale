@@ -5,7 +5,9 @@ import 'zeppelin-solidity/contracts/token/MintableToken.sol';
 import './purchase_preconditions/NonZeroAddress.sol';
 import './purchase_preconditions/NonZeroPurchase.sol';
 import './purchase_preconditions/InsideBuyingPeriod.sol';
+import './purchase_preconditions/PurchasePrecondition.sol';
 import './finalization_preconditions/BuyingPeriodHasEnded.sol';
+import './finalization_preconditions/FinalizationPrecondition.sol';
 
 /**
  * @title Crowdsale
@@ -34,10 +36,8 @@ contract Crowdsale {
   // amount of raised money in wei
   uint256 public weiRaised;
 
-  NonZeroAddress private nonZeroAddress;
-  NonZeroPurchase private nonZeroPurchase;
-  InsideBuyingPeriod private insideBuyingPeriod;
-  BuyingPeriodHasEnded private buyingPeriodHasEnded;
+  PurchasePrecondition[] private purchasePreconditions;
+  FinalizationPrecondition[] private finalizationPreconditions;
 
   /**
    * event for token purchase logging
@@ -61,10 +61,10 @@ contract Crowdsale {
     rate = _rate;
     wallet = _wallet;
 
-    nonZeroAddress = new NonZeroAddress();
-    nonZeroPurchase = new NonZeroPurchase();
-    insideBuyingPeriod = new InsideBuyingPeriod();
-    buyingPeriodHasEnded = new BuyingPeriodHasEnded();
+    purchasePreconditions.push(new NonZeroAddress());
+    purchasePreconditions.push(new NonZeroPurchase());
+    purchasePreconditions.push(new InsideBuyingPeriod());
+    finalizationPreconditions.push(new BuyingPeriodHasEnded());
   }
 
   // creates the token to be sold.
@@ -81,10 +81,8 @@ contract Crowdsale {
 
   // low level token purchase function
   function buyTokens(address beneficiary) public payable {
-    nonZeroAddress.evaluate(beneficiary, msg.value);
-    require(validPurchase(beneficiary));
-
     uint256 weiAmount = msg.value;
+    require(validPurchase(beneficiary, weiAmount));
 
     // calculate token amount to be created
     uint256 tokens = weiAmount.mul(rate);
@@ -104,17 +102,20 @@ contract Crowdsale {
     wallet.transfer(msg.value);
   }
 
-  // @return true if the transaction can buy tokens
-  function validPurchase(address beneficiary) internal view returns (bool) {
-    bool withinPeriod = insideBuyingPeriod.isValid(beneficiary, msg.value);
-    bool nonZero = nonZeroPurchase.isValid(beneficiary, msg.value);
-    return withinPeriod && nonZero;
-  }
-
   // @return true if crowdsale event has ended
   function hasEnded() public view returns (bool) {
-    return buyingPeriodHasEnded.isValid();
+    for(uint256 i = 0; i < finalizationPreconditions.length; i++) {
+      if(!finalizationPreconditions[i].isValid()) return false;
+    }
+    return true;
   }
 
+  // @return true if the transaction can buy tokens
+  function validPurchase(address beneficiary, uint256 value) internal view returns (bool) {
+    for(uint256 i = 0; i < purchasePreconditions.length; i++) {
+      if(!purchasePreconditions[i].isValid(beneficiary, value)) return false;
+    }
+    return true;
+  }
 
 }
