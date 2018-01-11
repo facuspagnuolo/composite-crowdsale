@@ -5,6 +5,7 @@ import 'zeppelin-solidity/contracts/token/MintableToken.sol';
 import './purchase_preconditions/NonZeroAddress.sol';
 import './purchase_preconditions/NonZeroPurchase.sol';
 import './purchase_preconditions/InsideBuyingPeriod.sol';
+import './finalization_preconditions/BuyingPeriodHasEnded.sol';
 
 /**
  * @title Crowdsale
@@ -36,6 +37,7 @@ contract Crowdsale {
   NonZeroAddress private nonZeroAddress;
   NonZeroPurchase private nonZeroPurchase;
   InsideBuyingPeriod private insideBuyingPeriod;
+  BuyingPeriodHasEnded private buyingPeriodHasEnded;
 
   /**
    * event for token purchase logging
@@ -62,6 +64,7 @@ contract Crowdsale {
     nonZeroAddress = new NonZeroAddress();
     nonZeroPurchase = new NonZeroPurchase();
     insideBuyingPeriod = new InsideBuyingPeriod();
+    buyingPeriodHasEnded = new BuyingPeriodHasEnded();
   }
 
   // creates the token to be sold.
@@ -110,7 +113,7 @@ contract Crowdsale {
 
   // @return true if crowdsale event has ended
   function hasEnded() public view returns (bool) {
-    return now > endTime;
+    return buyingPeriodHasEnded.isValid();
   }
 
 
