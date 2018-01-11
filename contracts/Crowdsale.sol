@@ -36,8 +36,8 @@ contract Crowdsale {
   // amount of raised money in wei
   uint256 public weiRaised;
 
-  PurchasePrecondition[] private purchasePreconditions;
-  FinalizationPrecondition[] private finalizationPreconditions;
+  PurchasePrecondition[] internal purchasePreconditions;
+  FinalizationPrecondition[] internal finalizationPreconditions;
 
   /**
    * event for token purchase logging
@@ -105,9 +105,9 @@ contract Crowdsale {
   // @return true if crowdsale event has ended
   function hasEnded() public view returns (bool) {
     for(uint256 i = 0; i < finalizationPreconditions.length; i++) {
-      if(!finalizationPreconditions[i].isValid()) return false;
+      if(finalizationPreconditions[i].isValid()) return true;
     }
-    return true;
+    return false;
   }
 
   // @return true if the transaction can buy tokens
