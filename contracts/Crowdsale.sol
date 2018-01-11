@@ -2,6 +2,8 @@ pragma solidity ^0.4.18;
 
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 import 'zeppelin-solidity/contracts/token/MintableToken.sol';
+import './purchase_preconditions/NonZeroAddress.sol';
+import './purchase_preconditions/NonZeroPurchase.sol';
 
 /**
  * @title Crowdsale
@@ -30,6 +32,9 @@ contract Crowdsale {
   // amount of raised money in wei
   uint256 public weiRaised;
 
+  NonZeroAddress private nonZeroAddress;
+  NonZeroPurchase private nonZeroPurchase;
+
   /**
    * event for token purchase logging
    * @param purchaser who paid for the tokens
@@ -51,6 +56,9 @@ contract Crowdsale {
     endTime = _endTime;
     rate = _rate;
     wallet = _wallet;
+
+    nonZeroAddress = new NonZeroAddress();
+    nonZeroPurchase = new NonZeroPurchase();
   }
 
   // creates the token to be sold.
@@ -67,8 +75,8 @@ contract Crowdsale {
 
   // low level token purchase function
   function buyTokens(address beneficiary) public payable {
-    require(beneficiary != 0x0);
-    require(validPurchase());
+    nonZeroAddress.evaluate(beneficiary, msg.value);
+    require(validPurchase(beneficiary));
 
     uint256 weiAmount = msg.value;
 
@@ -91,10 +99,9 @@ contract Crowdsale {
   }
 
   // @return true if the transaction can buy tokens
-  function validPurchase() internal view returns (bool) {
+  function validPurchase(address beneficiary) internal view returns (bool) {
     bool withinPeriod = now >= startTime && now <= endTime;
-    bool nonZeroPurchase = msg.value > 0;
-    return withinPeriod && nonZeroPurchase;
+    return withinPeriod && nonZeroPurchase.isValid(beneficiary, msg.value);
   }
 
   // @return true if crowdsale event has ended
