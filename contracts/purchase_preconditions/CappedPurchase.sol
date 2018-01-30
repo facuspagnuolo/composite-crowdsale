@@ -17,7 +17,7 @@ contract CappedPurchase is PurchasePrecondition {
     return _cap;
   }
 
-  function isValid(Crowdsale crowdsale, address beneficiary, uint256 value) public returns (bool) {
+  function isValid(Crowdsale crowdsale, address buyer, address beneficiary, uint256 value) public returns (bool) {
     return crowdsale.weiRaised().add(value) <= _cap;
   }
 }

@@ -1,8 +1,8 @@
 import ether from './helpers/ether';
 import EVMRevert from './helpers/EVMRevert';
 import latestTime from './helpers/latestTime';
-import { duration } from './helpers/increaseTime';
 import { advanceBlock } from './helpers/advanceToBlock';
+import { duration, increaseTimeTo } from './helpers/increaseTime';
 
 const BigNumber = web3.BigNumber
 
@@ -28,6 +28,10 @@ contract('WhitelistCrowdsale', function ([_, owner, wallet, beneficiary, sender]
 
   describe('whitelisting', function () {
     const amount = ether(1)
+
+    beforeEach(async function () {
+      await increaseTimeTo(this.startTime);
+    })
 
     it('should add address to whitelist', async function () {
       let whitelisted = await this.crowdsale.isWhitelisted(sender)

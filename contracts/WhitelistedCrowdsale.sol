@@ -1,6 +1,7 @@
 pragma solidity ^0.4.18;
 
 import './Crowdsale.sol';
+import './purchase_preconditions/WhitelistedAddress.sol';
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
 /**
@@ -11,24 +12,19 @@ import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 contract WhitelistedCrowdsale is Crowdsale, Ownable {
   using SafeMath for uint256;
 
-  // list of addresses that can purchase before crowdsale opens
-  mapping (address => bool) public whitelist;
+  WhitelistedAddress private whitelistedAddress;
+
+  function WhitelistedCrowdsale() public {
+    whitelistedAddress = new WhitelistedAddress();
+    purchasePreconditions.push(whitelistedAddress);
+  }
 
   function addToWhitelist(address buyer) public onlyOwner {
-    require(buyer != 0x0);
-    whitelist[buyer] = true;
+    whitelistedAddress.add(buyer);
   }
 
-  // @return true if buyer is whitelisted
   function isWhitelisted(address buyer) public constant returns (bool) {
-    return whitelist[buyer];
-  }
-
-  // overriding Crowdsale#validPurchase to add whitelist logic
-  // @return true if buyers can buy at the moment
-  function validPurchase(address beneficiary, uint256 value) internal constant returns (bool) {
-    // [TODO] issue with overriding and associativity of logical operators
-    return super.validPurchase(beneficiary, value) || (!hasEnded() && isWhitelisted(msg.sender));
+    return whitelistedAddress.isWhitelisted(buyer);
   }
 
 }

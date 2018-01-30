@@ -82,7 +82,7 @@ contract Crowdsale {
   // low level token purchase function
   function buyTokens(address beneficiary) public payable {
     uint256 weiAmount = msg.value;
-    require(validPurchase(beneficiary, weiAmount));
+    require(validPurchase(msg.sender, beneficiary, weiAmount));
 
     // calculate token amount to be created
     uint256 tokens = weiAmount.mul(rate);
@@ -111,9 +111,9 @@ contract Crowdsale {
   }
 
   // @return true if the transaction can buy tokens
-  function validPurchase(address beneficiary, uint256 value) internal view returns (bool) {
+  function validPurchase(address buyer, address beneficiary, uint256 value) internal view returns (bool) {
     for(uint256 i = 0; i < purchasePreconditions.length; i++) {
-      if(!purchasePreconditions[i].isValid(beneficiary, value)) return false;
+      if(!purchasePreconditions[i].isValid(buyer, beneficiary, value)) return false;
     }
     return true;
   }

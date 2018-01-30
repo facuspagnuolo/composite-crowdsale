@@ -4,7 +4,7 @@ import './PurchasePrecondition.sol';
 
 contract NonZeroPurchase is PurchasePrecondition {
 
-  function isValid(Crowdsale crowdsale, address beneficiary, uint256 value) public returns (bool) {
+  function isValid(Crowdsale crowdsale, address buyer, address beneficiary, uint256 value) public returns (bool) {
     return value > 0;
   }
 }
